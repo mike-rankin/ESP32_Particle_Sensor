@@ -9,8 +9,9 @@
 #include <SPI.h>
 #include <NTPClient.h>           //https://github.com/taranais/NTPClient
 #include <WiFi.h>
+//#include "WiFi.h"
 #include <WiFiUdp.h>
-#include <HTTPClient.h>
+#include <HTTPClient.h>  //Needed for the date
 #include "font.h"
 #include "overlay.h"
 #include "Wifi_Icons.h"
@@ -18,7 +19,7 @@
 #define RXD2 16
 #define TXD2 17
 #define SEALEVELPRESSURE_HPA (1013.25)
-#define temperaure_offset (6.7)
+#define temperaure_offset (6.7)  //6.7
 
 Adafruit_BME680 bme;
 Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
@@ -30,10 +31,10 @@ String formattedDate;
 String dayStamp;
 uint32_t targetTime = 0;      
 const long interval = 60000;  //Update every minute
-unsigned long previousMillis = 0;     
+unsigned long previousMillis = 0;   
 
-const char *ssid     = "SSID";         
-const char *password = "PASSWORD";  
+const char *ssid     = "SureShotGuest";  //SureShotGuest       
+const char *password = "TB12goat";       //TB12goat
 
 
 void setup() 
@@ -95,7 +96,7 @@ void setup()
   tft.pushImage(0,0,240,240,overlay);
   
   timeClient.begin();
-  timeClient.setTimeOffset(-14400);  //-14400 My timezone
+  timeClient.setTimeOffset(-10800);  //-14400 or -10800
   delay(500);
   timeClient.update();
 }
@@ -117,28 +118,41 @@ void loop()
   previousMillis = currentMillis; 
   timeClient.update();
   Serial.println("Time Updated");
+  //        tft.fillScreen(TFT_BLACK);     //This might rid the screen of garbage every minute
  }
 
-  tft.setTextSize(2);
-  tft.setCursor (0, 0); 
+  tft.setTextSize(1);
+  tft.setCursor (0, 7); 
   tft.print(__DATE__);
-      
+  tft.setCursor (100, 7); 
+  tft.print(__TIME__);
+  
+  tft.setTextSize(2);  //fixes font for PM2.5
+  /*
+  //// When the pm25 function was added, it now messes up the time 
+  
   currentHour = timeClient.getHours();
   currentMinute = timeClient.getMinutes();  
 
-  byte xpos = 155;
-  byte ypos = 0; 
-
-  if (currentHour<10) xpos+= tft.drawChar('0',xpos,ypos,1); // leading zero for hours
   if (currentHour>12) currentHour=currentHour-12;
-  xpos+= tft.drawNumber(currentHour,xpos,ypos,1); // hours
-  xpos+= tft.drawChar(':',xpos,ypos,1); 
-
-  if (currentMinute<10) xpos+= tft.drawChar('0',xpos,ypos,1); // leading zero for minutes
-  xpos+= tft.drawNumber(currentMinute,xpos,ypos,1); 
-
+  if (currentHour<10)
+  {
+   tft.drawChar(' ',155,0,1);  
+   tft.drawNumber(currentHour,168,0,1); 
+  }
+  else tft.drawNumber(currentHour,158,0,1); 
+  
+  tft.drawChar(':',182,0,1);  
+  
+  if (currentMinute<10)
+  {
+  tft.drawChar('0',195,0,1); 
+  tft.drawNumber(currentMinute,208,0,1);  
+  }
+  else tft.drawNumber(currentMinute,195,0,1);  
   delay(100);
-  Serial.print(".");
+  */
+ 
   WifiIcon(); 
 
 
@@ -153,14 +167,18 @@ void loop()
 
   Serial.print(F("\t\tPM 2.5: ")); Serial.print(data.pm25_standard);
   
-  tft.setTextSize(4);
-  tft.setTextColor(TFT_ORANGE,TFT_BLACK);
+ 
+  
+  tft.setTextColor(TFT_ORANGE,TFT_BLACK);                                             
+  uint16_t x = tft.width()/2;   // Find centre of screen
+  tft.setTextDatum(MC_DATUM);   // Set datum to Middle Center
+  int padding = tft.textWidth("8888", 4);
+  tft.setTextPadding(padding);
+  tft.drawNumber(data.pm25_standard, x, 60, 4);
+ 
 
-  tft.setCursor(100, 50);
-  tft.println(data.pm25_standard);
   
   tft.setCursor(180, 65);
-   
   tft.setTextSize(2); 
   tft.print("PM2.5");
 
@@ -198,7 +216,7 @@ void loop()
   tft.println("KOhms");
 
   bme.readAltitude(SEALEVELPRESSURE_HPA);
-  delay(50); 
+  delay(50);  
 }
 
  void WifiIcon() 
