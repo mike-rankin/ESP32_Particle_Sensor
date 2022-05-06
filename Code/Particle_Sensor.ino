@@ -11,7 +11,7 @@
 #include <WiFi.h>
 //#include "WiFi.h"
 #include <WiFiUdp.h>
-#include <HTTPClient.h>  //Needed for the date
+#include <HTTPClient.h>          //Needed for the date
 #include "font.h"
 #include "overlay.h"
 #include "Wifi_Icons.h"
@@ -19,7 +19,7 @@
 #define RXD2 16
 #define TXD2 17
 #define SEALEVELPRESSURE_HPA (1013.25)
-#define temperaure_offset (6.7)  //6.7
+#define temperaure_offset (6.7)  
 
 Adafruit_BME680 bme;
 Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
@@ -33,8 +33,8 @@ uint32_t targetTime = 0;
 const long interval = 60000;  //Update every minute
 unsigned long previousMillis = 0;   
 
-const char *ssid     = "SureShotGuest";  //SureShotGuest       
-const char *password = "TB12goat";       //TB12goat
+const char *ssid     = "SSID";        
+const char *password = "PASSWORD";      
 
 
 void setup() 
@@ -118,7 +118,6 @@ void loop()
   previousMillis = currentMillis; 
   timeClient.update();
   Serial.println("Time Updated");
-  //        tft.fillScreen(TFT_BLACK);     //This might rid the screen of garbage every minute
  }
 
   tft.setTextSize(1);
@@ -128,31 +127,6 @@ void loop()
   tft.print(__TIME__);
   
   tft.setTextSize(2);  //fixes font for PM2.5
-  /*
-  //// When the pm25 function was added, it now messes up the time 
-  
-  currentHour = timeClient.getHours();
-  currentMinute = timeClient.getMinutes();  
-
-  if (currentHour>12) currentHour=currentHour-12;
-  if (currentHour<10)
-  {
-   tft.drawChar(' ',155,0,1);  
-   tft.drawNumber(currentHour,168,0,1); 
-  }
-  else tft.drawNumber(currentHour,158,0,1); 
-  
-  tft.drawChar(':',182,0,1);  
-  
-  if (currentMinute<10)
-  {
-  tft.drawChar('0',195,0,1); 
-  tft.drawNumber(currentMinute,208,0,1);  
-  }
-  else tft.drawNumber(currentMinute,195,0,1);  
-  delay(100);
-  */
- 
   WifiIcon(); 
 
 
@@ -208,7 +182,7 @@ void loop()
   tft.setCursor(60, 210);
   tft.println("%");
 
-  tft.setCursor(165, 190); //over, down
+  tft.setCursor(165, 190); 
 
   tft.print(bme.gas_resistance / 1000.0,1);
 
@@ -223,7 +197,7 @@ void loop()
  {
   int32_t dbmicon = WiFi.RSSI();
    
-  if (dbmicon <= -80 )  //-85 is greater than -80
+  if (dbmicon <= -80 )  
   {
    tft.pushImage(225,0,16,16,wifi_1);
   } 
